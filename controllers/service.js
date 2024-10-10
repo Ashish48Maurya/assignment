@@ -1,6 +1,6 @@
 const axios = require('axios');
 const Crypto = require('../models/Coin');
-const { success, failure } = require('../utils/feature');
+const { success, failure, calculateStandardDeviation } = require('../utils/feature');
 
 exports.fetchCryptoData = async (req, res) => {
   try {
@@ -70,5 +70,38 @@ exports.latestData = async (req, res) => {
     return res.status(200).json(success(200, 'Data fetched successfully', data));
   } catch (error) {
     return res.status(500).json(failure(500, `Error fetching data: ${error.message}`, error.message));
+  }
+};
+
+
+exports.getDeviation = async (req, res) => {
+  try {
+    const { coinId } = req.query;
+    if (!coinId) {
+      return res.status(400).json(failure(400, 'coinId query parameter is required'));
+    }
+    const cryptoData = await Crypto.aggregate([
+      { $unwind: "$coins" },
+      { $match: { "coins.coinId": coinId } },
+      { $sort: { "coins.last_updated_at": -1 } },
+      { $limit: 100 },
+      { $group: { _id: null, prices: { $push: "$coins.usd" } } }
+    ]);
+
+    if (cryptoData.length === 0) {
+      return res.status(404).json(failure(404, `No data found for coinId: ${coinId}`));
+    }
+
+    const prices = cryptoData[0].prices;
+    const deviation = calculateStandardDeviation(prices);
+
+    return res.status(200).json(success(200, `Standard deviation for ${coinId} calculated successfully`, {
+      coinId,
+      deviation,
+      recordsConsidered: prices.length
+    }));
+
+  } catch (error) {
+    return res.status(500).json(failure(500, `Error calculating standard deviation: ${error.message}`, error.message));
   }
 };
