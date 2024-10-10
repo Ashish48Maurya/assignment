@@ -24,6 +24,6 @@ mongoConnect(process.env.MONGO_URL).then(() => {
     process.exit(1);
 });
 
-cron.schedule('* * * * *', async() => {
+cron.schedule('0 */2 * * *', async () => {
     await services.fetchCryptoData();
 });
