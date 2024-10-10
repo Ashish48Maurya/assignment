@@ -5,6 +5,9 @@ const PORT = process.env.PORT || 8000;
 const mongoConnect = require('./db')
 const services = require('./controllers/service')
 const cron = require('node-cron');
+const router = require('./routes/route')
+
+app.use('/api',router)
 
 app.get('/', (req, res) => {
     return res.status(200).json({

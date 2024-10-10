@@ -1,4 +1,4 @@
-const generateSuccessResponse = (status, message, data) => {
+const success = (status, message, data) => {
     return {
         status: status || 200,
         message: message || 'Operation successful',
@@ -6,7 +6,7 @@ const generateSuccessResponse = (status, message, data) => {
     };
 };
 
-const generateFailureResponse = (status, message, error) => {
+const failure = (status, message, error) => {
     return {
         status: status || 500,
         message: message || 'Operation failed',
@@ -15,6 +15,6 @@ const generateFailureResponse = (status, message, error) => {
 };
 
 module.exports = {
-    generateSuccessResponse,
-    generateFailureResponse
+    success,
+    failure
 };
